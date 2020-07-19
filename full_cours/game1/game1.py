@@ -9,6 +9,23 @@ try:
 except ImportError as err:
     print("this moudle didn't import", err)
     sys.exit(2)
+
+
+def load_png(name):
+    # load images and return them as objects
+    fullname = os.path.join("full_cours/images", name)
+    try:
+        image = pg.image.load(fullname)
+        if image.get_alpha() is None:
+            image = image.convert()
+        else:
+            image = image.convert_alpha()
+    except pg.error as message:
+        print("cannot load image", fullname)
+        raise SystemExit and message
+    return image
+
+
 ## make the screen and main function
 def main():
     pg.init()
