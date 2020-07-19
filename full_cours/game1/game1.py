@@ -8,7 +8,7 @@ try:
     from pygame.locals import *
 except ImportError as err:
     print("this moudle didn't import", err)
-
+    sys.exit(2)
 ## make the screen and main function
 def main():
     pg.init()
