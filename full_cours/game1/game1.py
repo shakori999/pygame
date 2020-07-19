@@ -48,6 +48,47 @@ class Ball(pg.sprite.Sprite):
         return rect.move(dx, dy)
 
 
+class Bat(pg.sprite.Sprite):
+    """ 
+    movable tennis "bat" with wich one hits the ball 
+    return: bat object
+    functions: reinit , update, moveup, movedown
+    attributes: which , speed
+    """
+
+    def __init__(self, side):
+        pg.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png("bat.png")
+        screen = pg.display.get_surface()
+        self.area = screen.get_rect()
+        self.side = side
+        self.speed = 10
+        self.state = "still"
+        self.reinit()
+
+    def reinit(self):
+        self.state = "still"
+        self.movepos = [0, 0]
+        if self.side == "left":
+            self.rect.midleft = self.area.midleft
+        elif self.side == "right":
+            self.rect.midright = self.area.midright
+
+    def update(self):
+        newpos = self.rect.move(self.movepos)
+        if self.area.contains(newpos):
+            self.rect = newpos
+        pg.event.pump()
+
+    def moveup(self):
+        self.movepos[1] = self.movepos[1] - (self.speed)
+        self.state = "moveup"
+
+    def movedown(self):
+        self.movepos[1] = self.movepos[1] + (self.speed)
+        self.state = "movedown"
+
+
 ## make the screen and main function
 def main():
     pg.init()
@@ -60,6 +101,15 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 sys.exit()
+            # elif event.type == pg.KEYDOWN:
+            #     if event.key == pg.K_UP:
+            #         player.moveup()
+            #     if event.key == pg.K_DOWN:
+            #         player.movedown()
+            # elif event.type == pg.KEYUP:
+            #     if event.key == pg.K_UP or event.key == pg.K_DOWN:
+            #         player.movepos = [0, 0]
+            #         player.state = "still"
 
         screen.fill(black)
         pg.display.flip()
