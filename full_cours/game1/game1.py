@@ -37,10 +37,36 @@ class Ball(pg.sprite.Sprite):
         screen = pg.display.get_surface()
         self.area = screen.get_rect()
         self.vector = vector
+        self.hit = 0
 
     def update(self):
         newpos = self.calcnewpos(self.rect, self.vector)
         self.rect = newpos
+        (angle, z) = self.vector
+
+        if not self.area.contains(newpos):
+            tl = not self.area.collidepoint(newpos.topleft)
+            tr = not self.area.collidepoint(newpos.topright)
+            bl = not self.area.collidepoint(newpos.bottomleft)
+            br = not self.area.collidepoint(newpos.bottomright)
+            if tr and tl or (br and bl):
+                angle = -angle
+            # if tl and bl:
+            #     # self.offcourt(player=2)
+            # if tr and br:
+            #     # self.offcourt(player=1)
+        else:
+            player1.rect.inflate(-3, -3)
+            player2.rect.inflate(-3, -3)
+            if self.rect.colliderect(player1.rect) == 1 and not self.hit:
+                angle = math.pi - angle
+                self.hit = not self.hit
+            elif self.rect.colliderect(player2.rect) == 1 and not self.hit:
+                angle = math.pi - angle
+                self.hit = not self.hit
+            elif self.hit:
+                self.hit = not self.hit
+        self.vector = (angle, z)
 
     def calcnewpos(self, rect, vector):
         (angle, z) = vector
@@ -58,6 +84,8 @@ class Bat(pg.sprite.Sprite):
 
     def __init__(self, side):
         pg.sprite.Sprite.__init__(self)
+        # filled_rect = pg.Rect(100, 100, 25, 150)
+        # bat = pg.draw.rect(screen, (125, 214, 129), filled_rect)
         self.image, self.rect = load_png("bat.png")
         screen = pg.display.get_surface()
         self.area = screen.get_rect()
@@ -98,7 +126,7 @@ def main():
 
     background = pg.Surface(screen.get_size())
     background = background.convert()
-    background.fill((0, 0, 0))
+    background.fill((150, 200, 100))
 
     # initialise players
     global player1
@@ -111,26 +139,41 @@ def main():
     ball = Ball((0, 0), (0.46, speed))
 
     ballsprite = pg.sprite.RenderPlain(ball)
+    playersprites = pg.sprite.RenderPlain(player1, player2)
 
     screen.blit(background, (0, 0))
     pg.display.flip()
 
+    clock = pg.time.Clock()
     while 1:
+        clock.tick(60)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 sys.exit()
-            # elif event.type == pg.KEYDOWN:
-            #     if event.key == pg.K_UP:
-            #         player.moveup()
-            #     if event.key == pg.K_DOWN:
-            #         player.movedown()
-            # elif event.type == pg.KEYUP:
-            #     if event.key == pg.K_UP or event.key == pg.K_DOWN:
-            #         player.movepos = [0, 0]
-            #         player.state = "still"
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_a:
+                    player1.moveup()
+                if event.key == pg.K_z:
+                    player1.movedown()
+                if event.key == pg.K_DOWN:
+                    player2.movedown()
+                if event.key == pg.K_UP:
+                    player2.moveup()
+            elif event.type == pg.KEYUP:
+                if event.key == pg.K_UP or event.key == pg.K_DOWN:
+                    player2.movepos = [0, 0]
+                    player2.state = "still"
+                if event.key == pg.K_a or event.key == pg.K_z:
+                    player1.movepos = [0, 0]
+                    player1.state = "still"
+
         screen.blit(background, ball.rect, ball.rect)
+        screen.blit(background, player1.rect, player1.rect)
+        screen.blit(background, player2.rect, player2.rect)
         ballsprite.update()
+        playersprites.update()
         ballsprite.draw(screen)
+        playersprites.draw(screen)
         pg.display.flip()
 
 
