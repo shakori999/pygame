@@ -31,7 +31,7 @@ class Ball(pg.sprite.Sprite):
     # returns: ball object
     # functions: update, calcnewpos
     # attributs: area , vector
-    def __init__(self, vector):
+    def __init__(self, xy, vector):
         pg.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png("ball.png")
         screen = pg.display.get_surface()
@@ -91,11 +91,29 @@ class Bat(pg.sprite.Sprite):
 
 ## make the screen and main function
 def main():
+
     pg.init()
-    black = 0, 0, 0
-    # """setup the screen"""
-    size = width, height = 500, 500
+    size = width, height = 1900, 1050
     screen = pg.display.set_mode(size)
+
+    background = pg.Surface(screen.get_size())
+    background = background.convert()
+    background.fill((0, 0, 0))
+
+    # initialise players
+    global player1
+    global player2
+    player1 = Bat("left")
+    player2 = Bat("right")
+
+    # """setup the screen"""
+    speed = 13
+    ball = Ball((0, 0), (0.46, speed))
+
+    ballsprite = pg.sprite.RenderPlain(ball)
+
+    screen.blit(background, (0, 0))
+    pg.display.flip()
 
     while 1:
         for event in pg.event.get():
@@ -110,8 +128,9 @@ def main():
             #     if event.key == pg.K_UP or event.key == pg.K_DOWN:
             #         player.movepos = [0, 0]
             #         player.state = "still"
-
-        screen.fill(black)
+        screen.blit(background, ball.rect, ball.rect)
+        ballsprite.update()
+        ballsprite.draw(screen)
         pg.display.flip()
 
 
